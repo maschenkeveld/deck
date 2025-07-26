@@ -12,13 +12,15 @@ var (
 	syncCmdDBUpdateDelay int
 	syncWorkspace        string
 	syncJSONOutput       bool
-)
+	syncCmdKongStateFile []string
 
-var syncCmdKongStateFile []string
+	// Preserve consumer-group associations when using select tags
+	preserveConsumerGroupAssociations bool
+)
 
 func executeSync(cmd *cobra.Command, _ []string) error {
 	return syncMain(cmd.Context(), syncCmdKongStateFile, false,
-		syncCmdParallelism, syncCmdDBUpdateDelay, syncWorkspace, syncJSONOutput, ApplyTypeFull)
+		syncCmdParallelism, syncCmdDBUpdateDelay, syncWorkspace, syncJSONOutput, ApplyTypeFull, preserveConsumerGroupAssociations)
 }
 
 // newSyncCmd represents the sync command
@@ -110,6 +112,12 @@ to get Kong's state in sync with the input state.`,
 		false, "assume `yes` to prompts and run non-interactively.")
 	syncCmd.Flags().BoolVar(&syncJSONOutput, "json-output",
 		false, "generate command execution report in a JSON format")
+	syncCmd.Flags().BoolVar(&preserveConsumerGroupAssociations, "preserve-consumer-group-associations",
+		false, "preserve existing consumer-group associations when using select tags.\n"+
+			"This automatically enables --skip-consumers-with-consumer-groups during sync\n"+
+			"to prevent deletion of consumer-group-consumer associations for consumers\n"+
+			"not included in the current sync operation due to tag filtering.\n"+
+			"Use this when managing consumers incrementally across multiple files.")
 	addSilenceEventsFlag(syncCmd.Flags())
 	return syncCmd
 }

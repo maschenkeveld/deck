@@ -15,7 +15,7 @@ var applyCmdKongStateFile []string
 
 func executeApply(cmd *cobra.Command, _ []string) error {
 	return syncMain(cmd.Context(), applyCmdKongStateFile, false,
-		applyCmdParallelism, applyCmdDBUpdateDelay, applyWorkspace, applyJSONOutput, ApplyTypePartial)
+		applyCmdParallelism, applyCmdDBUpdateDelay, applyWorkspace, applyJSONOutput, ApplyTypePartial, preserveConsumerGroupAssociations)
 }
 
 func newApplyCmd() *cobra.Command {
@@ -49,6 +49,12 @@ func newApplyCmd() *cobra.Command {
 			"See `db_update_propagation` in kong.conf.")
 	applyCmd.Flags().BoolVar(&syncJSONOutput, "json-output",
 		false, "generate command execution report in a JSON format")
+	applyCmd.Flags().BoolVar(&preserveConsumerGroupAssociations, "preserve-consumer-group-associations",
+		false, "preserve existing consumer-group associations when using select tags.\n"+
+			"This automatically enables --skip-consumers-with-consumer-groups during apply\n"+
+			"to prevent deletion of consumer-group-consumer associations for consumers\n"+
+			"not included in the current apply operation due to tag filtering.\n"+
+			"Use this when managing consumers incrementally across multiple files.")
 	addSilenceEventsFlag(applyCmd.Flags())
 
 	return applyCmd

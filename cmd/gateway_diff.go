@@ -17,7 +17,7 @@ var (
 
 func executeDiff(cmd *cobra.Command, _ []string) error {
 	return syncMain(cmd.Context(), diffCmdKongStateFile, true,
-		diffCmdParallelism, 0, diffWorkspace, diffJSONOutput, ApplyTypeFull)
+		diffCmdParallelism, 0, diffWorkspace, diffJSONOutput, ApplyTypeFull, preserveConsumerGroupAssociations)
 }
 
 // newDiffCmd represents the diff command
@@ -113,6 +113,12 @@ that will be created, updated, or deleted.
 			"This flag is not valid with Konnect.")
 	diffCmd.Flags().BoolVar(&syncCmdAssumeYes, "yes",
 		false, "assume `yes` to prompts and run non-interactively.")
+	diffCmd.Flags().BoolVar(&preserveConsumerGroupAssociations, "preserve-consumer-group-associations",
+		false, "preserve existing consumer-group associations when using select tags.\n"+
+			"This automatically enables --skip-consumers-with-consumer-groups during diff\n"+
+			"to prevent showing deletions of consumer-group-consumer associations for consumers\n"+
+			"not included in the current diff operation due to tag filtering.\n"+
+			"Use this when managing consumers incrementally across multiple files.")
 	addSilenceEventsFlag(diffCmd.Flags())
 	return diffCmd
 }
